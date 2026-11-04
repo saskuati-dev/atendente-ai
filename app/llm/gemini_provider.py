@@ -12,6 +12,7 @@ from app.llm.base import (
     REQUEST_TIMEOUT_SECONDS,
     AssistantMessage,
     LLMAuthError,
+    LLMBadRequestError,
     LLMProviderError,
     LLMRateLimitError,
     Message,
@@ -109,4 +110,6 @@ def _map_error(error: errors.APIError) -> Exception:
         return LLMAuthError("Chave do Gemini inválida ou sem permissão")
     if error.code == 429:
         return LLMRateLimitError("Limite de uso do Gemini atingido")
+    if error.code in (400, 404):
+        return LLMBadRequestError(f"Gemini recusou a requisição: {error.message}")
     return LLMProviderError(f"Falha na API do Gemini: {error.code}")

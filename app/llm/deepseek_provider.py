@@ -17,6 +17,7 @@ from app.llm.base import (
     REQUEST_TIMEOUT_SECONDS,
     AssistantMessage,
     LLMAuthError,
+    LLMBadRequestError,
     LLMProviderError,
     LLMRateLimitError,
     Message,
@@ -99,6 +100,8 @@ class DeepSeekProvider:
             raise LLMAuthError("Chave do DeepSeek inválida ou sem permissão") from error
         except openai.RateLimitError as error:
             raise LLMRateLimitError("Limite de uso do DeepSeek atingido") from error
+        except (openai.BadRequestError, openai.NotFoundError) as error:
+            raise LLMBadRequestError(f"DeepSeek recusou a requisição: {error.message}") from error
         except openai.APIStatusError as error:
             # O DeepSeek usa 402 para saldo insuficiente.
             if error.status_code == 402:

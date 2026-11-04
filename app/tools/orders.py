@@ -46,7 +46,7 @@ def _order_view(ctx: ToolContext, order: repo.Order, today: date) -> dict[str, A
     """Dados do pedido. O total é o registrado, sem recalcular pelo catálogo atual."""
     data: dict[str, Any] = {
         "order_id": order.order_id,
-        "order_date": order.order_date,
+        "placed_on": order.order_date,  # data da compra, não do envio
         "status": STATUS_LABELS[order.status],
         "total": format_brl(order.total_cents),
         "payment": _payment_label(order.payment_method),
@@ -57,6 +57,10 @@ def _order_view(ctx: ToolContext, order: repo.Order, today: date) -> dict[str, A
     }
     if order.tracking_code:
         data["tracking_code"] = order.tracking_code
+        data["tracking_note"] = (
+            "A consulta é feita no site dos Correios ou da Jadlog. O sistema não informa qual "
+            "transportadora fez o envio, nem a data de envio."
+        )
     if order.estimated_delivery:
         data["estimated_delivery"] = order.estimated_delivery
     if order.notes:

@@ -23,7 +23,11 @@ class LLMRateLimitError(LLMError):
 
 
 class LLMProviderError(LLMError):
-    """Erro do provedor, de rede ou de requisição recusada."""
+    """Erro do provedor ou de rede."""
+
+
+class LLMBadRequestError(LLMError):
+    """Requisição recusada pelo provedor, como um modelo inexistente."""
 
 
 @dataclass(frozen=True)

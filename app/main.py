@@ -14,7 +14,7 @@ from app.agent.loop import run_agent
 from app.api.sessions import InMemorySessionStore, SessionStore
 from app.config import Settings
 from app.db.connection import connect_readonly
-from app.llm.base import LLMAuthError, LLMError, LLMProvider, LLMRateLimitError
+from app.llm.base import LLMAuthError, LLMBadRequestError, LLMError, LLMProvider, LLMRateLimitError
 from app.llm.factory import (
     DEFAULT_MODELS,
     PROVIDER_ALIASES,
@@ -123,6 +123,8 @@ def create_app(
             raise HTTPException(status.HTTP_401_UNAUTHORIZED, str(error)) from error
         except LLMRateLimitError as error:
             raise HTTPException(status.HTTP_429_TOO_MANY_REQUESTS, str(error)) from error
+        except LLMBadRequestError as error:
+            raise HTTPException(status.HTTP_400_BAD_REQUEST, str(error)) from error
         except LLMError as error:
             logger.warning("Falha do provedor %s: %s", provider.name, error)
             raise HTTPException(status.HTTP_502_BAD_GATEWAY, str(error)) from error

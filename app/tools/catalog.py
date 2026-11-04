@@ -163,7 +163,8 @@ MSG_NOT_FOUND = (
 )
 MSG_CONFLICTING_DATA = (
     "A descrição e as especificações deste produto estão em revisão. Informe só o nome, o "
-    "preço e a disponibilidade, e oriente o cliente a confirmar os detalhes com a equipe."
+    "preço e a disponibilidade. Não confirme nem negue marca, modelo ou especificações, mesmo "
+    "as citadas pelo cliente, e oriente-o a confirmar os detalhes com a equipe."
 )
 AVAILABILITY_GUIDANCE = {
     "out_of_stock": "Temporariamente indisponível. Ofereça as alternativas listadas.",
@@ -245,7 +246,21 @@ def _summary(ctx: ToolContext, product: repo.Product) -> dict[str, Any]:
 
 
 def _alternatives(ctx: ToolContext, product: repo.Product, limit: int = 3) -> list[dict[str, Any]]:
-    """Produtos da mesma categoria com estoque, do preço mais próximo ao mais distante."""
+    """Produtos da mesma categoria com estoque, dos mais semelhantes aos menos semelhantes.
+
+    Prioriza o mesmo tipo de instrumento (7 cordas, depois tipo de corda) e, por fim, o preço.
+    """
+
+    def is_seven_string(item: repo.Product) -> bool:
+        return "7 cordas" in item.name.lower()
+
+    def similarity(item: repo.Product) -> tuple[bool, bool, int]:
+        return (
+            is_seven_string(item) != is_seven_string(product),
+            item.specs.get("strings") != product.specs.get("strings"),
+            abs(item.price_cents - product.price_cents),
+        )
+
     candidates = repo.search_products(
         ctx.catalog,
         category_id=product.category_id,
@@ -253,7 +268,7 @@ def _alternatives(ctx: ToolContext, product: repo.Product, limit: int = 3) -> li
         limit=repo.MAX_SEARCH_RESULTS,
     )
     candidates = [c for c in candidates if c.product_id != product.product_id]
-    candidates.sort(key=lambda c: abs(c.price_cents - product.price_cents))
+    candidates.sort(key=similarity)
     return [_summary(ctx, c) for c in candidates[:limit]]
 
 
@@ -290,7 +305,14 @@ def search_products(ctx: ToolContext, args: SearchProductsArgs) -> dict[str, Any
         limit=repo.MAX_SEARCH_RESULTS,
     )
     if not found:
-        return {"total_matches": 0, "products": [], "message": MSG_NOT_FOUND}
+        return {
+            "total_matches": 0,
+            "products": [],
+            "message": MSG_NOT_FOUND,
+            "categories_with_products": [
+                c.name for c in repo.list_categories(ctx.catalog) if c.product_count > 0
+            ],
+        }
 
     # Disponíveis primeiro; a ordem por preço do repositório se mantém em cada grupo.
     found.sort(key=lambda p: _availability(p) != "available")

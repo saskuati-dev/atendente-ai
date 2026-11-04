@@ -48,7 +48,7 @@ curl -s localhost:8000/chat \
 
 | Status | Motivo |
 |---|---|
-| 400 | Provedor desconhecido |
+| 400 | Provedor desconhecido, ou requisição recusada pelo provedor (ex.: modelo inexistente) |
 | 401 | Chave ausente, inválida ou sem permissão |
 | 404 | Sessão inexistente ou expirada |
 | 409 | A mensagem anterior da sessão ainda está em andamento |

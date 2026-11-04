@@ -12,6 +12,7 @@ from app.llm.anthropic_provider import AnthropicProvider
 from app.llm.base import (
     AssistantMessage,
     LLMAuthError,
+    LLMBadRequestError,
     LLMProviderError,
     LLMRateLimitError,
     Message,
@@ -429,6 +430,15 @@ def test_http_errors_are_mapped_without_leaking_the_key(
     with pytest.raises(expected) as caught:
         FACTORIES[name](recorder).complete("s", [UserMessage("x")], TOOLS)
     assert SECRET_KEY not in str(caught.value)
+
+
+@pytest.mark.parametrize("name", FACTORIES)
+@pytest.mark.parametrize("status", [400, 404])
+def test_rejected_request_explains_the_reason(name: str, status: int) -> None:
+    message = "Modelo inexistente: use outro"
+    body = {"error": {"code": status, "message": message}, "message": message}
+    with pytest.raises(LLMBadRequestError, match="Modelo inexistente"):
+        FACTORIES[name](Recorder((status, body))).complete("s", [UserMessage("x")], TOOLS)
 
 
 @pytest.mark.parametrize("name", FACTORIES)

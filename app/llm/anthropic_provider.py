@@ -12,6 +12,7 @@ from app.llm.base import (
     REQUEST_TIMEOUT_SECONDS,
     AssistantMessage,
     LLMAuthError,
+    LLMBadRequestError,
     LLMProviderError,
     LLMRateLimitError,
     Message,
@@ -91,6 +92,8 @@ class AnthropicProvider:
             raise LLMAuthError("Chave da Anthropic inválida ou sem permissão") from error
         except anthropic.RateLimitError as error:
             raise LLMRateLimitError("Limite de uso da Anthropic atingido") from error
+        except (anthropic.BadRequestError, anthropic.NotFoundError) as error:
+            raise LLMBadRequestError(f"Anthropic recusou a requisição: {error.message}") from error
         except anthropic.APIError as error:
             raise LLMProviderError(f"Falha na API da Anthropic: {type(error).__name__}") from error
 

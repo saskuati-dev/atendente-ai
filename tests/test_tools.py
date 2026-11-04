@@ -270,6 +270,27 @@ def test_available_products_come_first(ctx: ToolContext) -> None:
 # Produto e disponibilidade
 
 
+def test_alternatives_prefer_the_same_kind_of_instrument(ctx: ToolContext) -> None:
+    seven_string = run(ctx, "get_product", product_id=113)["alternatives"]
+    assert all("7 Cordas" in a["name"] for a in seven_string)
+    steel = run(ctx, "get_product", product_id=96)["alternatives"]
+    assert not any("Nylon" in a["name"] for a in steel)
+
+
+def test_empty_search_lists_only_categories_with_products(ctx: ToolContext) -> None:
+    categories = run(ctx, "search_products", query="violino")["categories_with_products"]
+    assert "Violões" in categories
+    assert "Cordas Orquestrais" not in categories
+    assert not any("Sopro" in c for c in categories)
+
+
+def test_tracking_note_does_not_assume_a_carrier(ctx: ToolContext, order_8_phone: str) -> None:
+    order = run(ctx, "get_order", order_id=8, phone=order_8_phone)["orders"][0]
+    assert "Correios ou da Jadlog" in order["tracking_note"]
+    assert "order_date" not in order
+    assert order["placed_on"] == "2026-02-15"
+
+
 def test_available_product_with_details(ctx: ToolContext) -> None:
     result = run(ctx, "get_product", product_id=81)
     assert result["availability"] == "available"

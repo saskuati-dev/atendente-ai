@@ -17,6 +17,7 @@ from app.llm.base import (
     REQUEST_TIMEOUT_SECONDS,
     AssistantMessage,
     LLMAuthError,
+    LLMBadRequestError,
     LLMProviderError,
     LLMRateLimitError,
     Message,
@@ -91,6 +92,8 @@ class OpenAIProvider:
             raise LLMAuthError("Chave da OpenAI inválida ou sem permissão") from error
         except openai.RateLimitError as error:
             raise LLMRateLimitError("Limite de uso da OpenAI atingido") from error
+        except (openai.BadRequestError, openai.NotFoundError) as error:
+            raise LLMBadRequestError(f"OpenAI recusou a requisição: {error.message}") from error
         except openai.APIError as error:
             raise LLMProviderError(f"Falha na API da OpenAI: {type(error).__name__}") from error
 

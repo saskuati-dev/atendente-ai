@@ -16,6 +16,7 @@ from app.config import Settings
 from app.llm.base import (
     AssistantMessage,
     LLMAuthError,
+    LLMBadRequestError,
     LLMError,
     LLMProviderError,
     LLMRateLimitError,
@@ -247,6 +248,7 @@ def test_settings_do_not_expose_keys_in_repr() -> None:
         (LLMAuthError("Chave inválida"), 401),
         (LLMRateLimitError("Limite atingido"), 429),
         (LLMProviderError("Falha"), 502),
+        (LLMBadRequestError("Modelo inexistente"), 400),
     ],
 )
 def test_provider_errors_are_mapped(api: Harness, error: LLMError, expected: int) -> None:
