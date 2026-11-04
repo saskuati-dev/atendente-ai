@@ -576,6 +576,10 @@ def test_policy_schema_lists_all_topics() -> None:
     assert schema["parameters"]["properties"]["topic"]["enum"] == list(POLICY_TOPICS)
 
 
+def test_schemas_have_no_titles() -> None:
+    assert '"title"' not in json.dumps(tool_schemas())
+
+
 def test_unknown_tool_returns_error(ctx: ToolContext) -> None:
     assert run(ctx, "drop_database")["error"] == "Tool desconhecida: drop_database"
 

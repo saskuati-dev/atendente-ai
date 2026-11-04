@@ -28,6 +28,15 @@ def register_complaint(ctx: ToolContext, args: RegisterComplaintArgs) -> dict[st
     return {"registered": True, "protocol": protocol, "response_deadline": "24 horas úteis"}
 
 
+def _without_titles(schema: Any) -> Any:
+    """Remove os "title" gerados pelo Pydantic: repetem os nomes e só gastam tokens."""
+    if isinstance(schema, dict):
+        return {k: _without_titles(v) for k, v in schema.items() if k != "title"}
+    if isinstance(schema, list):
+        return [_without_titles(item) for item in schema]
+    return schema
+
+
 @dataclass(frozen=True)
 class Tool:
     name: str
@@ -39,7 +48,7 @@ class Tool:
         return {
             "name": self.name,
             "description": self.description,
-            "parameters": self.args_model.model_json_schema(),
+            "parameters": _without_titles(self.args_model.model_json_schema()),
         }
 
 
