@@ -1,0 +1,49 @@
+# Python
+__pycache__/
+*.py[cod]
+*.so
+*.egg-info/
+build/
+dist/
+
+# Ambientes virtuais
+.venv/
+venv/
+
+# Segredos (chaves de API dos provedores)
+.env
+.env.*
+!.env.example
+
+# Bancos gerados a partir de data/*.csv (build_db) e estado da aplicação
+*.db
+*.db-journal
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+
+# Testes e ferramentas
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+.coverage.*
+htmlcov/
+
+# Resultados locais de evals
+evals/results/
+
+# Logs
+*.log
+
+# IDEs e sistema operacional
+.vscode/
+.idea/
+*.swp
+.DS_Store
+
+# Configurações locais do Claude Code
+.claude/settings.local.json
+CLAUDE.local.md
+CLAUDE.md
