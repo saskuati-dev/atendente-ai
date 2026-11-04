@@ -191,6 +191,7 @@ def test_same_provider_history_is_untouched() -> None:
 @pytest.mark.parametrize(
     "expected",
     [
+        "Você é Sol",
         "Empório da Música",
         "Sua música começa aqui",
         "get_policy",

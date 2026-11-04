@@ -513,7 +513,7 @@ def test_every_topic_has_a_section_and_nothing_extra() -> None:
         ("promocoes", "não indica que uma campanha esteja ativa"),
         ("garantia", "90 dias"),
         ("privacidade", "LGPD"),
-        ("sobre", "(67) 3321-4500"),
+        ("sobre", "Telefone e WhatsApp: (67) 3341-4444"),
     ],
 )
 def test_policy_content(ctx: ToolContext, topic: str, expected: str) -> None:
@@ -530,6 +530,7 @@ def test_contradictions_are_resolved() -> None:
     text = "\n".join(load_policies().values())
     assert "empóriodamusica" not in text
     assert "Parcela mínima de R$ 100,00" not in text
+    assert "3321-4500" not in text
 
 
 def test_invalid_policy_topic(ctx: ToolContext) -> None:

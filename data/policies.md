@@ -4,7 +4,7 @@ Cada seção começa com "## [tópico]". O tom e o fluxo de atendimento (seção
 prompt do agente, não aqui.
 
 Contradições do PDF resolvidas nesta versão:
-- WhatsApp: (67) 3321-4500 (seção 7), e não (67) 3341-4444, que fica como telefone (capa e 1.2).
+- WhatsApp: (67) 3341-4444 (capa e 1.2), e não (67) 3321-4500 (seção 7). Confirmado pelo responsável.
 - E-mail: contato@emporiodamusica.com.br (capa), e não a grafia com acento (1.2).
 - Parcela mínima: faixas da seção 3.1, no lugar do "mínimo de R$ 100" da tabela da seção 3.
 - "Sem valor mínimo (exceto abaixo de R$ 50,00)": interpretado como mínimo de R$ 50 até 3x.
@@ -18,8 +18,7 @@ A loja trabalha exclusivamente com instrumentos musicais. Não vende acessórios
 - Razão social: Empório da Música Instrumentos Musicais Ltda.
 - CNPJ: 12.345.678/0001-90
 - Endereço: Rua 14 de Maio, 3200, Centro, Campo Grande - MS, CEP 79202-333
-- Telefone: (67) 3341-4444
-- WhatsApp: (67) 3321-4500
+- Telefone e WhatsApp: (67) 3341-4444
 - E-mail: contato@emporiodamusica.com.br
 
 ## [horario] Horário de funcionamento

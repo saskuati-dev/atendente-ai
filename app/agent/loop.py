@@ -24,7 +24,7 @@ MAX_ITERATIONS = 8
 
 FALLBACK_REPLY = (
     "Desculpa, não consegui concluir sua solicitação agora. Você pode falar com a nossa equipe "
-    "pelo WhatsApp (67) 3321-4500 ou pelo telefone (67) 3341-4444."
+    "pelo telefone ou WhatsApp (67) 3341-4444."
 )
 
 

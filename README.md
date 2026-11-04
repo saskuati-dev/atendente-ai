@@ -90,11 +90,11 @@ Os dados têm inconsistências que não foram corrigidas na origem:
 | Totais de pedidos diferentes do catálogo (pedidos 3 e 20) | Vale sempre o total registrado |
 | Clientes 11 e 43 com o mesmo e-mail | E-mail só identifica o cliente junto com o número do pedido |
 
-Contradições do manual, resolvidas em `data/policies.md` e que **precisam de validação da loja**:
+Contradições do manual, resolvidas em `data/policies.md`. O WhatsApp foi confirmado; as demais **ainda precisam de validação da loja**:
 
 | Assunto | No manual | Adotado |
 |---|---|---|
-| WhatsApp | (67) 3341-4444 (capa e 1.2) e (67) 3321-4500 (seção 7) | 3321-4500 como WhatsApp, 3341-4444 como telefone |
+| WhatsApp | (67) 3341-4444 (capa e 1.2) e (67) 3321-4500 (seção 7) | (67) 3341-4444 para telefone e WhatsApp, confirmado pelo responsável |
 | E-mail | `emporiodamusica` e `empóriodamusica` | `contato@emporiodamusica.com.br` |
 | Parcela mínima | R$ 100 na tabela da seção 3 e faixas na seção 3.1 | Faixas da seção 3.1 |
 | Parcelas até 3x | "Sem valor mínimo (exceto abaixo de R$ 50,00)" | Mínimo de R$ 50 |
@@ -115,8 +115,32 @@ uv run python evals/run_evals.py --provider deepseek --model deepseek-flash
 
 Os casos estão em `evals/cases.py`, e as respostas completas ficam em `evals/results/`.
 
+## Uso de IA no desenvolvimento
+
+O projeto foi desenvolvido com o [Claude Code](https://claude.com/claude-code) (modelo Claude Opus 5.5), em etapas revisadas uma de cada vez: dados, tools, agente e provedores, API e avaliação.
+
+**Decisões do responsável pelo projeto:**
+- Escopo, stack (Python e FastAPI) e provedores do BYOK.
+- Adapters próprios em vez de um framework de agentes, entre as opções apresentadas.
+- Políticas por seções fixas em vez de busca vetorial, depois de discutir como RAG e embeddings funcionariam neste caso.
+- Tratamento dos produtos com nome e descrição em conflito, com base na recomendação da IA.
+- Número de WhatsApp correto e nome da persona (Sol).
+
+**Trabalho da IA:**
+- Análise dos CSVs e do manual, incluindo a identificação das inconsistências listadas acima.
+- Escrita do código, dos testes, das evals, do prompt da persona e desta documentação.
+- Consulta à documentação dos provedores, que levou a usar a API Responses na OpenAI e um adapter próprio para o DeepSeek.
+
+**Como o resultado foi verificado:**
+- Testes automatizados, que não precisam de chave de API.
+- Evals com o DeepSeek, além da leitura de parte das respostas, porque várias passavam nos critérios automáticos mesmo estando ruins.
+- Questionamento humano dos resultados: ao perguntar por que "cordas de aço" não mostrava instrumentos, o responsável levou à descoberta de um defeito na busca escrita pela IA, que comparava trechos de palavras ("aço" casava com "braço").
+
+As evals da IA também encontraram erros dela mesma, como a invenção de uma regra sobre boquilhas e a oferta de categorias sem produtos. Esses casos viraram testes ou evals. Os demais provedores não foram validados com chaves reais, como indicado nas limitações abaixo.
+
 ## Limitações conhecidas
 
+- Só o DeepSeek foi validado com um modelo real. Anthropic, OpenAI e Gemini foram testados com HTTP simulado e com chave falsa nas APIs reais, o que confirma o acesso, mas não o uso das tools.
 - As sessões ficam em memória: valem para um único processo e se perdem ao reiniciar.
 - A API não tem autenticação nem limite de requisições, o que seria necessário em produção, inclusive para evitar tentativas de consulta a pedidos.
 - Listar pedidos só com o telefone pressupõe um canal que confirme o número, como o WhatsApp.
