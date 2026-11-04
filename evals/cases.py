@@ -27,6 +27,10 @@ class Case:
 
 PRODUCT_TOOLS = ("search_products", "get_product")
 DATA_TOOLS = (*PRODUCT_TOOLS, "list_active_promotions", "get_payment_options", "get_order")
+NOT_SOLD = (
+    r"nao (vende|vendemos|trabalh|temos|comerci)|exclusivamente"
+    r"|so (vende|trabalh)|(vende|vendemos|trabalha|trabalhamos) so\b"
+)
 INVENTED_STORES = (r"loja parceira [a-z]", r"recomendo a loja", r"mercado livre", r"amazon")
 
 CASES: tuple[Case, ...] = (
@@ -253,18 +257,14 @@ CASES: tuple[Case, ...] = (
         "acessorio_palheta",
         "escopo",
         ("Vocês têm palhetas?",),
-        must_match=(
-            r"nao (vende|vendemos|trabalh|temos|comerci)|exclusivamente|so (vende|trabalh)",
-        ),
+        must_match=(NOT_SOLD,),
         must_not_match=INVENTED_STORES,
     ),
     Case(
         "acessorio_cordas",
         "escopo",
         ("Preciso de cordas para o meu violão, quanto custa?",),
-        must_match=(
-            r"nao (vende|vendemos|trabalh|temos|comerci)|exclusivamente|so (vende|trabalh)",
-        ),
+        must_match=(NOT_SOLD,),
         must_not_match=(*INVENTED_STORES, r"r\$ ?\d"),
     ),
     Case(

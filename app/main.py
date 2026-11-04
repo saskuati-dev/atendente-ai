@@ -103,7 +103,9 @@ def create_app(
             raise HTTPException(status.HTTP_422_UNPROCESSABLE_CONTENT, "Mensagem vazia.")
         provider = build_provider(x_llm_provider, x_llm_api_key, x_llm_model)
 
-        session = store.get(request.session_id) if request.session_id else store.create()
+        session = (
+            store.get(request.session_id) if request.session_id is not None else store.create()
+        )
         if session is None:
             raise HTTPException(
                 status.HTTP_404_NOT_FOUND,

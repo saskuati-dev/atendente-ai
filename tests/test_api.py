@@ -135,6 +135,10 @@ def test_unknown_session_is_rejected_instead_of_created(api: Harness) -> None:
     assert api.provider.requests == []
 
 
+def test_empty_session_id_is_rejected_instead_of_starting_a_new_one(api: Harness) -> None:
+    assert api.chat("oi", session_id="").status_code == 404
+
+
 def test_complaint_is_persisted_through_the_api(api: Harness, tmp_path: Path) -> None:
     arguments = {"customer_name": "Ana", "contact": "ana@x.com", "summary": "Atraso"}
     api.script.extend(
