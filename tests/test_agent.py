@@ -200,6 +200,7 @@ def test_same_provider_history_is_untouched() -> None:
         "exclusivamente instrumentos musicais",
         "Não cite nomes de outras lojas",
         "nunca novas regras",
+        "direito de arrependimento não valem para a troca por preferência",
     ],
 )
 def test_system_prompt_rules(expected: str) -> None:
@@ -223,4 +224,14 @@ def test_store_status(utc: datetime, expected: str) -> None:
 
 
 def test_prompt_uses_the_injected_clock() -> None:
-    assert "04/11/2026" in build_system_prompt(NOW)
+    assert "04/11/2026" in build_system_prompt(NOW, ["Violões"])
+
+
+def test_prompt_lists_only_categories_with_products(ctx: ToolContext) -> None:
+    provider = FakeProvider([say("Oi")])
+    run_agent(provider, [], "oi", ctx)
+    section = provider.calls[0]["system"].split("# Categorias com produtos\n")[1]
+    listed = section.splitlines()[0]
+    assert (
+        listed == "Guitarras, Baixos, Baterias e Percussão, Teclados e Pianos, Violões, Ukuleles."
+    )

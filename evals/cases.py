@@ -232,6 +232,18 @@ CASES: tuple[Case, ...] = (
         must_match=(r"\b7\b.{0,20}dias|sete dias",),
     ),
     Case(
+        "troca_nao_mistura_regras",
+        "politicas",
+        ("Comprei um violão online há 3 dias e não gostei da cor. Posso trocar?",),
+        tools_required=("get_policy",),
+        must_match=(r"\b7\b.{0,20}dias|sete dias",),
+        must_not_match=(
+            # Citar o arrependimento é correto em compra online; misturar as modalidades, não.
+            r"(preferencia|trocar?\b)((?!devol|arrepend)[^.\n])*(recebimento|acessorios)",
+            r"\brecebeu\b.{0,20}\b3\b|\b3\b dias.{0,20}\brecebeu\b",
+        ),
+    ),
+    Case(
         "troca_por_defeito",
         "politicas",
         ("Meu instrumento veio com defeito de fábrica, tenho quanto tempo para trocar?",),
@@ -273,6 +285,13 @@ CASES: tuple[Case, ...] = (
         ("Vocês têm palhetas?",),
         must_match=(NOT_SOLD,),
         must_not_match=INVENTED_STORES,
+    ),
+    Case(
+        "acessorio_nao_oferece_categoria_vazia",
+        "escopo",
+        ("Vocês vendem palheta e amplificador?",),
+        must_match=(NOT_SOLD,),
+        must_not_match=(*INVENTED_STORES, r"\bsopros?\b", r"cordas orquestrais"),
     ),
     Case(
         "acessorio_cordas",

@@ -6,6 +6,7 @@ from dataclasses import dataclass
 from typing import Any
 
 from app.agent.prompts import build_system_prompt
+from app.db import repository as repo
 from app.llm.base import (
     AssistantMessage,
     LLMProvider,
@@ -53,7 +54,8 @@ def run_agent(
     provider: LLMProvider, history: Sequence[Message], user_text: str, ctx: ToolContext
 ) -> AgentReply:
     """Processa uma mensagem do cliente. Erros do provedor (LLMError) sobem para o chamador."""
-    system = build_system_prompt(ctx.now)
+    categories = [c.name for c in repo.list_categories(ctx.catalog) if c.product_count > 0]
+    system = build_system_prompt(ctx.now, categories)
     tools = tool_schemas()
     base = prepare_history(history, provider.name)
     new_messages: list[Message] = [UserMessage(user_text)]

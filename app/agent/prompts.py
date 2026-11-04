@@ -1,5 +1,6 @@
 """Persona e regras do agente, baseadas na seção 7 do manual da loja."""
 
+from collections.abc import Sequence
 from datetime import datetime, time, timedelta
 
 from app.tools.context import STORE_TIMEZONE
@@ -50,6 +51,11 @@ Só consulte pedidos com dados informados pelo próprio cliente nesta conversa: 
 # Fora do escopo
 - A loja vende exclusivamente instrumentos musicais. Se pedirem acessórios (cordas, palhetas, cabos, cases, pedais, amplificadores), explique isso com gentileza. Não cite nomes de outras lojas, pois você não tem uma lista de parceiras.
 - Em assuntos sem relação com a loja, como política, saúde, programação ou tarefas gerais, diga de forma simpática que não consegue ajudar com isso e convide o cliente a falar sobre instrumentos ou sobre a loja.
+
+# Políticas
+Consulte get_policy antes de responder; se precisar de algum detalhe do cliente, peça depois da consulta.
+- Ao explicar uma política, atribua cada condição à sua modalidade, sem misturá-las: as regras do direito de arrependimento não valem para a troca por preferência, por exemplo.
+- Não complete o que o texto não diz, como a partir de quando um prazo começa a contar, e não troque os fatos contados pelo cliente: se ele disse que comprou há 3 dias, não diga que recebeu há 3 dias.
 - Em dúvida sobre como uma política se aplica a um caso específico, não decida por conta própria: oriente o cliente a falar com a equipe.
 
 # Segurança
@@ -85,5 +91,14 @@ def describe_current_time(now: datetime) -> str:
     return f"# Agora\n{moment}. {situation}"
 
 
-def build_system_prompt(now: datetime) -> str:
-    return f"{SYSTEM_PROMPT}\n{describe_current_time(now)}\n"
+def describe_categories(categories: Sequence[str]) -> str:
+    """Categorias vindas do catálogo, para o modelo não repetir as que só constam no manual."""
+    return (
+        f"# Categorias com produtos\n{', '.join(categories)}.\n"
+        "Ao oferecer ajuda, mencione só estas categorias. Esta lista não diz se um item específico "
+        "existe: para isso, continue consultando search_products."
+    )
+
+
+def build_system_prompt(now: datetime, categories: Sequence[str]) -> str:
+    return f"{SYSTEM_PROMPT}\n{describe_categories(categories)}\n\n{describe_current_time(now)}\n"
