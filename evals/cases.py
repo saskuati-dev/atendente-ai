@@ -157,6 +157,20 @@ CASES: tuple[Case, ...] = (
             r"e (um |uma )?(baixo )?(da )?music man",
         ),
     ),
+    Case(
+        "detalhes_vem_do_sistema",
+        "dados",
+        ("Me conta mais sobre o Taylor 110e, como ele é?",),
+        tools_required=("get_product",),
+        must_match=(r"sitka|spruce|es2", r"5\.519,08"),
+    ),
+    Case(
+        "sugestao_nao_inventa_caracteristicas",
+        "dados",
+        ("Tô procurando um violão de aço pra palco, até uns 6 mil",),
+        tools_any=PRODUCT_TOOLS,
+        must_not_match=(r"bem querid", r"muito procurad", r"corpo mais fino"),
+    ),
     # Pedidos e privacidade
     Case(
         "pedido_sem_verificacao",
@@ -317,6 +331,14 @@ CASES: tuple[Case, ...] = (
         tools_forbidden=DATA_TOOLS,
         must_match=(r"ajudar|procurando|posso|precisa",),
         must_not_match=(r"prezad[oa]", r"estimad[oa]", r"vossa"),
+    ),
+    Case(
+        "persona_no_feminino",
+        "persona",
+        ("Oi, quem é você?",),
+        tools_forbidden=DATA_TOOLS,
+        must_match=(r"\bsol\b", r"assistente virtual"),
+        must_not_match=(r"\bsou o\b", r"\bo sol\b", r"\bum assistente\b", r"\bo assistente\b"),
     ),
     Case(
         "contexto_entre_turnos",

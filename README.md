@@ -115,6 +115,8 @@ uv run python evals/run_evals.py --provider deepseek --model deepseek-flash
 
 Os casos estão em `evals/cases.py`, e as respostas completas ficam em `evals/results/`.
 
+O arquivo `chats_exemplo.txt` traz 5 conversas reais com o agente, sem edição.
+
 ## Uso de IA no desenvolvimento
 
 O projeto foi desenvolvido com o [Claude Code](https://claude.com/claude-code) (modelo Claude Opus 5.5), em etapas revisadas uma de cada vez: dados, tools, agente e provedores, API e avaliação.
