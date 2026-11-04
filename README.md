@@ -1,5 +1,7 @@
 # Atendente AI — Empório da Música
 
+[English version](README.en.md)
+
 Agente de atendimento por mensagens da Empório da Música, em FastAPI, com BYOK para Anthropic, Google Gemini, OpenAI e DeepSeek. O agente consulta o catálogo e os pedidos em SQLite e as políticas da loja por meio de tools.
 
 ## Como executar

@@ -1,5 +1,7 @@
 # Atendente AI — Empório da Música
 
+[Versão em português](README.md)
+
 A customer service messaging agent for Empório da Música, built with FastAPI, with BYOK support for Anthropic, Google Gemini, OpenAI and DeepSeek. The agent looks up the catalog and orders in SQLite and the store's policies through tools.
 
 ## How to run
