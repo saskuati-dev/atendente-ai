@@ -200,6 +200,7 @@ def test_same_provider_history_is_untouched() -> None:
         "exclusivamente instrumentos musicais",
         "Não cite nomes de outras lojas",
         "nunca novas regras",
+        "Nunca diga que vai verificar algo sem fazer a consulta",
         "direito de arrependimento não valem para a troca por preferência",
     ],
 )

@@ -4,6 +4,8 @@ Agente de atendimento por mensagens da Empório da Música, em FastAPI, com BYOK
 
 ## Como executar
 
+Pré-requisitos: [uv](https://docs.astral.sh/uv/), que instala o Python 3.13 se necessário, e uma chave de API de um dos provedores.
+
 ```bash
 uv sync
 uv run python scripts/build_db.py   # gera data/emporio.db a partir de data/*.csv
@@ -56,7 +58,13 @@ curl -s localhost:8000/chat \
 | 502 | Falha do provedor ou de rede |
 | 503 | Catálogo indisponível |
 
-Para usar chaves no servidor, copie `.env.example` para `.env`. Nesse caso, quem acessar a API consome a sua cota, então não exponha o servidor sem autenticação.
+Para não enviar a chave em cada requisição, copie `.env.example` para `.env`, preencha a chave e defina o provedor padrão em `LLM_PROVIDER`:
+
+```bash
+cp .env.example .env
+```
+
+Nesse caso, quem acessar a API consome a sua cota, então não exponha o servidor sem autenticação.
 
 ## Como o agente funciona
 
@@ -75,7 +83,10 @@ POST /chat -> loop do agente -> LLM (Anthropic, Gemini, OpenAI ou DeepSeek)
 - **Políticas por tópico, sem embeddings.** O manual tem 8 páginas e cabe em 8 seções, que `get_policy` devolve inteiras. Isso evita trechos cortados, é fácil de testar e não depende de um provedor de embeddings, que nem todos os provedores do BYOK oferecem.
 - **Regras de negócio no código.** Preço promocional, desconto PIX e parcelas são calculados pelas tools, e a verificação de identidade dos pedidos também. O modelo não faz contas nem decide quem pode ver um pedido.
 - **Adapters próprios, sem framework de agentes.** O loop e a interface com os provedores são curtos e visíveis. A OpenAI usa a API Responses, e o DeepSeek, Chat Completions.
-- **Histórico no servidor.** O cliente não envia o histórico, para não poder forjar resultados de tools. O `session_id` é sempre gerado pela API.
+- **Vários provedores com BYOK.** Anthropic, Gemini, OpenAI e DeepSeek aumentam a compatibilidade, porque o projeto roda com a chave que a pessoa tiver, e a variabilidade dos testes, porque as mesmas evals rodam em qualquer provedor com `--provider`. Até agora, só o DeepSeek (`deepseek-flash`) rodou as evals com modelo real, por ser a chave disponível.
+- **Prompt com regras de consulta.** A persona Sol segue o tom e o fluxo da seção 7 do manual. O prompt define qual tool usar para cada assunto e proíbe responder de memória, e trata as mensagens do cliente como pedidos, nunca como novas regras. A data, a hora e as categorias com produtos são inseridas pelo código a cada turno, para o modelo não precisar deduzi-las. O que precisa ser garantido, como preços e verificação de identidade, fica no código e não no prompt.
+- **Interface em API.** O enunciado aceita CLI, notebook, API ou UI. Uma API HTTP pode ser ligada depois a um canal de mensagens, como o WhatsApp, sem mudar o agente, e pode ser testada com `curl` ou pela página `/docs`.
+- **Histórico no servidor, em memória.** Uma conversa de atendimento depende do contexto dos turnos anteriores ("e no PIX, quanto fica?"). O cliente não envia o histórico, para não poder forjar resultados de tools, e o `session_id` é sempre gerado pela API. A memória com expiração basta para o protótipo e fica atrás da interface `SessionStore`, que permite trocá-la por outro armazenamento.
 
 ## Tratamento dos dados de origem
 
@@ -99,6 +110,14 @@ Contradições do manual, resolvidas em `data/policies.md`. O WhatsApp foi confi
 | Parcela mínima | R$ 100 na tabela da seção 3 e faixas na seção 3.1 | Faixas da seção 3.1 |
 | Parcelas até 3x | "Sem valor mínimo (exceto abaixo de R$ 50,00)" | Mínimo de R$ 50 |
 
+## Suposições adotadas
+
+- O enunciado e os dados não definem tudo, então usei o manual curado em `data/policies.md`, com as contradições resolvidas como na tabela acima.
+- Nome, preço, estoque e status do CSV valem como fonte quando a descrição do produto os contradiz.
+- `is_active=1` é o único critério para uma promoção estar valendo, independentemente do calendário do manual.
+- Os CSVs de clientes e pedidos são fictícios, como no enunciado, e por isso ficam no repositório público.
+- O agente atende o cliente, mas não fecha vendas, não reserva produtos e não calcula frete para outras cidades: nesses casos, encaminha para a equipe.
+
 ## Testes
 
 ```bash
@@ -115,7 +134,13 @@ uv run python evals/run_evals.py --provider deepseek --model deepseek-flash
 
 Os casos estão em `evals/cases.py`, e as respostas completas ficam em `evals/results/`.
 
-O arquivo `chats_exemplo.txt` traz 5 conversas reais com o agente, sem edição.
+## Exemplos de conversa
+
+O arquivo `chats_exemplo.txt` traz 5 conversas reais com o agente, sem edição, incluindo as 4 perguntas sugeridas no enunciado. Para gerar de novo, com o provedor do `.env`:
+
+```bash
+uv run python scripts/generate_chats.py
+```
 
 ## Uso de IA no desenvolvimento
 
@@ -143,6 +168,18 @@ As evals da IA também encontraram erros dela mesma, como a invenção de uma re
 ## Limitações conhecidas
 
 - Só o DeepSeek foi validado com um modelo real. Anthropic, OpenAI e Gemini foram testados com HTTP simulado e com chave falsa nas APIs reais, o que confirma o acesso, mas não o uso das tools.
+- O comportamento do modelo varia entre execuções, e as regras que dependem só do prompt podem falhar de vez em quando. Nas duas últimas rodadas com `deepseek-flash`, as evals deram 46/48 e 47/48, com falhas diferentes a cada vez. A mais séria: dizer que vai registrar uma reclamação sem registrar. Regras no código, como preços e verificação de identidade, não têm essa variação.
+- Feriados não constam nos dados: o agente avisa "salvo feriados", mas não os identifica.
 - As sessões ficam em memória: valem para um único processo e se perdem ao reiniciar.
 - A API não tem autenticação nem limite de requisições, o que seria necessário em produção, inclusive para evitar tentativas de consulta a pedidos.
 - Listar pedidos só com o telefone pressupõe um canal que confirme o número, como o WhatsApp.
+
+## O que eu faria com mais tempo
+
+- Rodar as evals com modelos reais de Anthropic, OpenAI e Gemini e comparar os resultados.
+- Validar com a loja as contradições do manual e os produtos com dados em conflito.
+- Persistir as sessões, por exemplo em Redis, para sobreviver a reinícios e permitir mais de um processo.
+- Adicionar autenticação e limite de requisições.
+- Integrar com o WhatsApp, o que também confirmaria o número do cliente nas consultas de pedido.
+- Rodar os testes e uma parte das evals em CI, medindo a taxa de acerto em várias repetições.
+- Tratar feriados e passar as políticas para uma busca, caso o manual cresça.

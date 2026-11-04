@@ -320,6 +320,11 @@ def search_products(ctx: ToolContext, args: SearchProductsArgs) -> dict[str, Any
         "total_matches": len(found),
         "products": [_summary(ctx, p) for p in found[: args.limit]],
     }
+    if len(found) > args.limit:
+        result["more_results_note"] = (
+            f"Esta lista traz {args.limit} de {len(found)} produtos. Não a apresente como "
+            "completa: diga ao cliente quantos existem no total, ou aumente limit para ver mais."
+        )
     if classification == "ambiguous_strings":
         result["accessory_note"] = MSG_AMBIGUOUS_STRINGS
     return result

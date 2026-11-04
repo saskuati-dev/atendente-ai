@@ -222,6 +222,7 @@ def test_search_filters_and_reports_total(ctx: ToolContext) -> None:
         ctx, "search_products", category="violoes", max_price=700, only_available=True, limit=2
     )
     assert result["total_matches"] > len(result["products"]) == 2
+    assert f"2 de {result['total_matches']} produtos" in result["more_results_note"]
     assert all(p["category"] == "Violões" for p in result["products"])
 
 
@@ -616,3 +617,9 @@ def test_database_failure_returns_error_without_data(tmp_path: Path, db_path: Pa
     ctx = ToolContext(catalog=broken, complaints=ComplaintStore(tmp_path / "s.db"), now=NOW)
     result = run(ctx, "get_product", product_id=81)
     assert "Sistema indisponível" in result["error"]
+
+
+def test_complete_search_has_no_more_results_note(ctx: ToolContext) -> None:
+    result = run(ctx, "search_products", category="violoes", max_price=1000, limit=20)
+    assert len(result["products"]) == result["total_matches"]
+    assert "more_results_note" not in result

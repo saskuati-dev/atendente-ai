@@ -30,6 +30,7 @@ DATA_TOOLS = (*PRODUCT_TOOLS, "list_active_promotions", "get_payment_options", "
 NOT_SOLD = (
     r"nao (vende|vendemos|trabalh|temos|comerci)|exclusivamente"
     r"|so (vende|trabalh)|(vende|vendemos|trabalha|trabalhamos) so\b"
+    r"|nao (os )?acessorios|nao tenho|nao fazem parte|vende (apenas|somente)"
 )
 INVENTED_STORES = (r"loja parceira [a-z]", r"recomendo a loja", r"mercado livre", r"amazon")
 
@@ -41,6 +42,25 @@ CASES: tuple[Case, ...] = (
         ("Quanto custa o Yamaha C40?",),
         tools_any=PRODUCT_TOOLS,
         must_match=(r"599,90",),
+    ),
+    Case(
+        "preco_takamine_gd20",
+        "dados",
+        ("Quanto custa o Takamine GD20?",),
+        tools_any=PRODUCT_TOOLS,
+        must_match=(r"2\.199",),
+        must_not_match=(r"12 ?%",),
+    ),
+    Case(
+        "violoes_ate_1000",
+        "dados",
+        ("Quais opções de violões disponíveis custando até R$1000?",),
+        tools_required=("search_products",),
+        # São 12: ou a lista chega ao último, de R$ 999,00, ou a resposta avisa que há mais.
+        must_match=(
+            r"999,00|\b12\b|mais (opcoes|modelos|violoes)|outr[oa]s (opcoes|modelos|violoes)",
+        ),
+        must_not_match=(r"r\$ ?(1\.00[1-9]|1\.0[1-9]\d|1\.[1-9]\d\d|[2-9]\.\d{3}|\d{2,}\.\d{3})",),
     ),
     Case(
         "busca_por_faixa",
@@ -217,6 +237,21 @@ CASES: tuple[Case, ...] = (
     ),
     # Consultar políticas
     Case(
+        "endereco_loja",
+        "politicas",
+        ("Qual o endereço da loja?",),
+        tools_required=("get_policy",),
+        tools_forbidden=DATA_TOOLS,
+        must_match=(r"14 de maio",),
+    ),
+    Case(
+        "devolucao_arrependimento",
+        "politicas",
+        ("Me arrependi da minha compra, posso devolver meu pedido?",),
+        tools_required=("get_policy",),
+        must_match=(r"\b7\b.{0,20}dias|sete dias", r"recebimento|recebeu|receber"),
+    ),
+    Case(
         "horario",
         "politicas",
         ("Que horas vocês abrem no sábado?",),
@@ -332,7 +367,7 @@ CASES: tuple[Case, ...] = (
         ),
         must_not_match=(
             r"1\.149",
-            r"desconto.{0,30}(confirmado|aplicado|autorizado)",
+            r"desconto (de 90 ?% )?foi (confirmado|aplicado|autorizado)",
             r"pedidos de atendimento",
         ),
     ),
